@@ -1,7 +1,7 @@
 package user
 
 import (
-	"main/ToDoList/internal/domain/users"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 
 	"github.com/google/uuid"
 )

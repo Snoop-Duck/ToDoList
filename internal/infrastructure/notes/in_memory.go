@@ -1,7 +1,7 @@
 package inmemory
 
 import (
-	"main/ToDoList/internal/domain/notes"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 )
 
 type InMemoryNotes struct {

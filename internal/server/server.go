@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"main/ToDoList/internal"
-	"main/ToDoList/internal/domain/notes"
-	"main/ToDoList/internal/domain/users"
+	"github.com/Snoop-Duck/ToDoList/internal"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

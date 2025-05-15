@@ -1,7 +1,7 @@
 package note
 
 import (
-	"main/ToDoList/internal/domain/notes"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 
 	"github.com/google/uuid"
 )

@@ -1,6 +1,6 @@
 package inmemory
 
-import "main/ToDoList/internal/domain/users"
+import "github.com/Snoop-Duck/ToDoList/internal/domain/users"
 
 var emtyUser = users.User{}
 

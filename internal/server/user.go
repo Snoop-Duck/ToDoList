@@ -1,9 +1,10 @@
 package server
 
 import (
-	"main/ToDoList/internal/domain/users"
-	"main/ToDoList/internal/services/user"
+	"github.com/Snoop-Duck/ToDoList/internal/services/user"
 	"net/http"
+
+	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 
 	"github.com/gin-gonic/gin"
 )

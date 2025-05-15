@@ -1,8 +1,8 @@
 package server
 
 import (
-	"main/ToDoList/internal/domain/notes"
-	"main/ToDoList/internal/services/note"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
+	"github.com/Snoop-Duck/ToDoList/internal/services/note"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

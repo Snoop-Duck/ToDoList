@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
-	"main/ToDoList/internal"
-	inmemorynotes "main/ToDoList/internal/infrastructure/notes"
-	inmemory "main/ToDoList/internal/infrastructure/users"
-	"main/ToDoList/internal/server"
+
+	inmemory "github.com/Snoop-Duck/ToDoList/internal/infrastructure/users"
+
+	"github.com/Snoop-Duck/ToDoList/internal/server"
+
+	inmemorynotes "github.com/Snoop-Duck/ToDoList/internal/infrastructure/notes"
+
+	"github.com/Snoop-Duck/ToDoList/internal"
 )
 
 func main() {
