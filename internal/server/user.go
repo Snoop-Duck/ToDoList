@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/Snoop-Duck/ToDoList/internal/services/user"
 	"net/http"
+
+	"github.com/Snoop-Duck/ToDoList/internal/services/user"
 
 	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 
@@ -25,6 +26,12 @@ func (s *NotesAPI) login(ctx *gin.Context) {
 		return
 	}
 
+	token, err := jwtToken(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.Header("Authorization", token)
 	ctx.String(http.StatusOK, "user logined: %s", userID)
 }
 
@@ -43,7 +50,12 @@ func (s *NotesAPI) register(ctx *gin.Context) {
 		ctx.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 		return
 	}
-
+	token, err := jwtToken(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.Header("Authorization", token)
 	ctx.String(http.StatusOK, "user registered: %s", userID)
 }
 

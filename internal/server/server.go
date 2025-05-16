@@ -3,13 +3,18 @@ package server
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Snoop-Duck/ToDoList/internal"
 	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
-	"net/http"
+	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/gin-gonic/gin"
 )
+
+var jwtKey = []byte("my_secret_key")
 
 type Repository interface {
 	SaveUser(user users.User) error
@@ -79,4 +84,32 @@ func (nApi *NotesAPI) configRoutes() {
 		notes.DELETE("del/:id", nApi.deleteNote)
 	}
 	nApi.httpServe.Handler = router
+}
+
+func jwtToken(uid string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Subject:   uid,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 3)),
+	})
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		return ``, err
+	}
+	return tokenString, nil
+}
+
+func validateJwtToken(tokenString string) (string, error) {
+	claims := jwt.RegisteredClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtKey), nil
+	})
+	if err != nil {
+		return ``, err
+	}
+
+	if !token.Valid {
+		return ``, fmt.Errorf("invalid token")
+	}
+
+	return claims.Subject, nil
 }
