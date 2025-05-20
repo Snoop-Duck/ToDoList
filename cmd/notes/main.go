@@ -8,7 +8,7 @@ import (
 	inmemorynotes "github.com/Snoop-Duck/ToDoList/internal/infrastructure/notes"
 
 	"github.com/Snoop-Duck/ToDoList/internal"
-	"github.com/Snoop-Duck/ToDoList/pkg/logger"
+	logger "github.com/Snoop-Duck/ToDoList/pkg"
 )
 
 func main() {
