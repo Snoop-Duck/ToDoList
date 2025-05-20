@@ -4,9 +4,14 @@ go 1.24.2
 
 require github.com/gin-gonic/gin v1.10.0
 
-require github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
+require (
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/rs/zerolog v1.34.0 // indirect
+)
 
 require (
+	github.com/Dorrrke/notes-g2 v0.0.0-20250506175137-ce4e57d5c5a0
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect

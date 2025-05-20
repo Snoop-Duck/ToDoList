@@ -1,6 +1,9 @@
 package inmemory
 
-import "github.com/Snoop-Duck/ToDoList/internal/domain/users"
+import (
+	"github.com/Dorrrke/notes-g2/pkg/logger"
+	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
+)
 
 var emtyUser = users.User{}
 
@@ -9,6 +12,8 @@ type InMemory struct {
 }
 
 func New() *InMemory {
+	log := logger.Get()
+	log.Debug().Msg("create in memory storage")
 	return &InMemory{
 		userStorage: make(map[string]users.User),
 	}
@@ -62,5 +67,5 @@ func (im *InMemory) UpdateUserID(userID string, user users.User) error {
 		return users.ErrUserNotFound
 	}
 	im.userStorage[userID] = user
-	return nil 
+	return nil
 }

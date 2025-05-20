@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	inmemory "github.com/Snoop-Duck/ToDoList/internal/infrastructure/users"
 
 	"github.com/Snoop-Duck/ToDoList/internal/server"
@@ -10,13 +8,20 @@ import (
 	inmemorynotes "github.com/Snoop-Duck/ToDoList/internal/infrastructure/notes"
 
 	"github.com/Snoop-Duck/ToDoList/internal"
+	"github.com/Snoop-Duck/ToDoList/pkg/logger"
 )
 
 func main() {
 	cfg := internal.ReadConfig()
-	fmt.Printf("Host: %s\nPort: %d\n", cfg.Host, cfg.Port)
+
+	log := logger.Get(cfg.Debug)
+
+	log.Info().Msg("service starting")
+
 	noteRepo := inmemorynotes.New()
 	userRepo := inmemory.New()
 	notesAPI := server.New(cfg, userRepo, noteRepo)
-	notesAPI.Run()
+	if err := notesAPI.Run(); err != nil {
+		log.Error().Err(err).Msg("fatal running server")
+	}
 }
