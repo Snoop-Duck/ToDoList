@@ -1,9 +1,11 @@
 package server
 
 import (
+	"net/http"
+
+	"github.com/Dorrrke/notes-g2/pkg/logger"
 	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 	"github.com/Snoop-Duck/ToDoList/internal/services/note"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,14 +27,17 @@ func (s *NotesAPI) createNote(ctx *gin.Context) {
 }
 
 func (s *NotesAPI) getNotes(ctx *gin.Context) {
+	log := logger.Get()
+	uid := ctx.GetString("uid")
+	log.Debug().Str("uid", uid).Msg("user id from gin context")
 	noteService := note.New(s.repoNote)
 
-	allNotes, err := noteService.GetNotes()
+	notes, err := noteService.GetNotes()
 	if err != nil {
 		ctx.JSON(http.StatusNoContent, gin.H{"error": "No tasks"})
 		return
 	}
-	ctx.String(http.StatusAccepted, "Notes get: %s", allNotes)
+	ctx.String(http.StatusAccepted, "Notes get: %s", notes)
 }
 
 func (s *NotesAPI) getNoteID(ctx *gin.Context) {

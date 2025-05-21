@@ -84,13 +84,34 @@ func (nApi *NotesAPI) configRoutes() {
 	}
 	notes := router.Group("/notes")
 	{
-		notes.GET("/list", nApi.getNotes)
+		notes.GET("/list", nApi.JWTMiddleware(), nApi.getNotes)
 		notes.GET("list/:id", nApi.getNoteID)
 		notes.POST("/add", nApi.createNote)
 		notes.PUT("upd/:id", nApi.updateNote)
 		notes.DELETE("del/:id", nApi.deleteNote)
 	}
 	nApi.httpServe.Handler = router
+}
+
+func (nApi *NotesAPI) JWTMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		log := logger.Get()
+		token := ctx.GetHeader("Authorization")
+		if token == `` {
+			log.Error().Msg("token not found")
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		uid, err := validateJwtToken(token)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to validate token")
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, "invalid token")
+			return
+		}
+		log.Debug().Str("uid", uid).Msg("user was authorized")
+		ctx.Set("uid", uid)
+		ctx.Next()
+	}
 }
 
 func jwtToken(uid string) (string, error) {
