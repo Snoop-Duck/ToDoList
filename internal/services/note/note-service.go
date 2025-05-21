@@ -32,7 +32,11 @@ func (ns *NoteService) CreateNote(note notes.Note) (string, error) {
 }
 
 func (ns *NoteService) GetNotes() (map[string]notes.Note, error) {
-	return ns.repo.GetNotes()
+	notes, err := ns.repo.GetNotes()
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
 }
 
 func (ns *NoteService) GetNoteID(noteID string) (notes.Note, error) {
