@@ -11,6 +11,8 @@ import (
 
 	"github.com/Snoop-Duck/ToDoList/internal"
 	logger "github.com/Snoop-Duck/ToDoList/pkg"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -28,6 +30,12 @@ func main() {
 		log.Warn().Err(err).Msg("failed to connect to db. Use in memory storage")
 		repoUser = inmemory.New()
 	}
+	if err = dbstorage.AppyMigrations("postgres://user:password@localhost:5432/notes?sslmode=disable"); err != nil {
+		log.Warn().Err(err).Msg("failed to apply migrations. Use in memory storage")
+		repoUser.Close()
+		repoUser = inmemory.New()
+	}
+
 	notesAPI := server.New(cfg, repoUser, noteRepo)
 	if err := notesAPI.Run(); err != nil {
 		log.Error().Err(err).Msg("fatal running server")

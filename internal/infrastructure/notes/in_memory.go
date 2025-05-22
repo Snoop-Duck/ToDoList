@@ -20,7 +20,7 @@ func (im *InMemoryNotes) AddNote(note notes.Note) error {
 			return notes.ErrNoteAlredyExists
 		}
 	}
-	im.noteStorage[note.UID] = note
+	im.noteStorage[note.NID] = note
 	return nil
 }
 

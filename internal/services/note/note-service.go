@@ -22,13 +22,13 @@ func New(repo RepositoryNote) *NoteService {
 	return &NoteService{repo: repo}
 }
 func (ns *NoteService) CreateNote(note notes.Note) (string, error) {
-	note.UID = uuid.New().String()
+	note.NID = uuid.New().String()
 
 	err := ns.repo.AddNote(note)
 	if err != nil {
 		return ``, err
 	}
-	return note.UID, nil
+	return note.NID, nil
 }
 
 func (ns *NoteService) GetNotes() (map[string]notes.Note, error) {

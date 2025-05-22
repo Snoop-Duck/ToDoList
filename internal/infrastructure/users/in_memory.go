@@ -69,3 +69,5 @@ func (im *InMemory) UpdateUserID(userID string, user users.User) error {
 	im.userStorage[userID] = user
 	return nil
 }
+
+func (im *InMemory) Close() error {return nil}

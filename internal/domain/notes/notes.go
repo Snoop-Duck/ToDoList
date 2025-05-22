@@ -1,8 +1,12 @@
 package notes
 
+import "time"
+
 type Note struct {
-	UID         string `json:"uid"`
+	NID         string `json:"nid"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	Status      string `json:"status"`
+	Status      Status `json:"status"`
+	Created_at  time.Time `json:"created_at"`
+	UID         string `json:"uid"`
 }
