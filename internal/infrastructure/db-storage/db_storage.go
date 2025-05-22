@@ -18,3 +18,4 @@ func New(ctx context.Context, addr string) (*DBStorage, error) {
 
 	return &DBStorage{db: conn}, nil
 }
+
