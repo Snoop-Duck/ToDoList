@@ -4,16 +4,6 @@ import (
 	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 )
 
-type InMemoryNotes struct {
-	noteStorage map[string]notes.Note
-}
-
-func New() *InMemoryNotes {
-	return &InMemoryNotes{
-		noteStorage: make(map[string]notes.Note),
-	}
-}
-
 func (im *InMemoryNotes) AddNote(note notes.Note) error {
 	for _, id := range im.noteStorage {
 		if id.Title == note.Title {

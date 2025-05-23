@@ -1,25 +1,10 @@
 package inmemory
 
 import (
-	"github.com/Dorrrke/notes-g2/pkg/logger"
 	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 )
 
-var emtyUser = users.User{}
-
-type InMemory struct {
-	userStorage map[string]users.User
-}
-
-func New() *InMemory {
-	log := logger.Get()
-	log.Debug().Msg("create in memory storage")
-	return &InMemory{
-		userStorage: make(map[string]users.User),
-	}
-}
-
-func (im *InMemory) SaveUser(user users.User) error {
+func (im *InMemoryUsers) SaveUser(user users.User) error {
 	for _, us := range im.userStorage {
 		if us.Email == user.Email {
 			return users.ErrUserAlredyExists
@@ -30,7 +15,7 @@ func (im *InMemory) SaveUser(user users.User) error {
 	return nil
 }
 
-func (im *InMemory) GetUser(login string) (users.User, error) {
+func (im *InMemoryUsers) GetUser(login string) (users.User, error) {
 	for _, us := range im.userStorage {
 		if us.Email == login {
 			return us, nil
@@ -39,7 +24,7 @@ func (im *InMemory) GetUser(login string) (users.User, error) {
 	return emtyUser, users.ErrUserNotFound
 }
 
-func (im *InMemory) DeleteUser(userID string) error {
+func (im *InMemoryUsers) DeleteUser(userID string) error {
 	if _, ok := im.userStorage[userID]; !ok {
 		return users.ErrUserNotFound
 	}
@@ -47,14 +32,14 @@ func (im *InMemory) DeleteUser(userID string) error {
 	return nil
 }
 
-func (im *InMemory) GetAllUsers() (map[string]users.User, error) {
+func (im *InMemoryUsers) GetAllUsers() (map[string]users.User, error) {
 	if len(im.userStorage) == 0 {
 		return nil, users.ErrNoUsersAvailable
 	}
 	return im.userStorage, nil
 }
 
-func (im *InMemory) GetUserID(userID string) (users.User, error) {
+func (im *InMemoryUsers) GetUserID(userID string) (users.User, error) {
 	user, ok := im.userStorage[userID]
 	if !ok {
 		return users.User{}, users.ErrUserNotFound
@@ -62,7 +47,7 @@ func (im *InMemory) GetUserID(userID string) (users.User, error) {
 	return user, nil
 }
 
-func (im *InMemory) UpdateUserID(userID string, user users.User) error {
+func (im *InMemoryUsers) UpdateUserID(userID string, user users.User) error {
 	if _, ok := im.userStorage[userID]; !ok {
 		return users.ErrUserNotFound
 	}
@@ -70,4 +55,4 @@ func (im *InMemory) UpdateUserID(userID string, user users.User) error {
 	return nil
 }
 
-func (im *InMemory) Close() error {return nil}
+func (im *InMemoryUsers) Close() error { return nil }
