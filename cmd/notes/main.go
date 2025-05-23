@@ -6,8 +6,7 @@ import (
 	"github.com/Snoop-Duck/ToDoList/internal/server"
 
 	dbstorage "github.com/Snoop-Duck/ToDoList/internal/infrastructure/db-storage"
-	inmemorynotes "github.com/Snoop-Duck/ToDoList/internal/infrastructure/notes"
-	inmemory "github.com/Snoop-Duck/ToDoList/internal/infrastructure/users"
+	inmemory "github.com/Snoop-Duck/ToDoList/internal/infrastructure/in-memory"
 
 	"github.com/Snoop-Duck/ToDoList/internal"
 	logger "github.com/Snoop-Duck/ToDoList/pkg"
@@ -24,19 +23,19 @@ func main() {
 
 	var repoUser server.Repository
 	var err error
-	noteRepo := inmemorynotes.New()
+	repoNote := inmemory.NewNotes()
 	repoUser, err = dbstorage.New(context.Background(), "postgres://user:password@localhost:5432/notes?sslmode=disable")
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to connect to db. Use in memory storage")
-		repoUser = inmemory.New()
+		repoUser = inmemory.NewUsers()
 	}
 	if err = dbstorage.AppyMigrations("postgres://user:password@localhost:5432/notes?sslmode=disable"); err != nil {
 		log.Warn().Err(err).Msg("failed to apply migrations. Use in memory storage")
 		repoUser.Close()
-		repoUser = inmemory.New()
+		repoUser = inmemory.NewUsers()
 	}
 
-	notesAPI := server.New(cfg, repoUser, noteRepo)
+	notesAPI := server.New(cfg, repoUser, repoNote)
 	if err := notesAPI.Run(); err != nil {
 		log.Error().Err(err).Msg("fatal running server")
 	}
