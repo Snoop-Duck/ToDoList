@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users(
     email TEXT NOT NULL,
     password TEXT NOT NULL,
     unique(email)
-)
+);
 
 CREATE TABLE IF NOT EXISTS notes(
     nid VARCHAR(36) PRIMARY KEY,
@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS notes(
     user_id VARCHAR(36) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(uid),
     unique(title)
-)
+);

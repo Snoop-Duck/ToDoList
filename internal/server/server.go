@@ -86,10 +86,10 @@ func (nApi *NotesAPI) configRoutes() {
 	notes := router.Group("/notes")
 	{
 		notes.GET("/list", nApi.JWTMiddleware(), nApi.getNotes)
-		notes.GET("list/:id", nApi.getNoteID)
+		notes.GET("/list/:id", nApi.getNoteID)
 		notes.POST("/add", nApi.createNote)
-		notes.PUT("upd/:id", nApi.updateNote)
-		notes.DELETE("del/:id", nApi.deleteNote)
+		notes.PUT("/upd/:id", nApi.updateNote)
+		notes.DELETE("/del/:id", nApi.deleteNote)
 	}
 	nApi.httpServe.Handler = router
 }
