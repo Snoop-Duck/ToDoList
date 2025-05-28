@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users(
     name TEXT NOT NULL,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    unique(email)
+    UNIQUE(email)
 );
 
 CREATE TABLE IF NOT EXISTS notes(
@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS notes(
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     user_id VARCHAR(36) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(uid),
-    unique(title)
+    UNIQUE(title)
 );

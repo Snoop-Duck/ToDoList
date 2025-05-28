@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -13,7 +12,7 @@ var log zerolog.Logger
 
 var once sync.Once
 
-func Get(flag ...bool) zerolog.Logger {
+func Get(debug ...bool) zerolog.Logger {
 	once.Do(func() {
 		zerolog.TimestampFieldName = "TIME"
 		zerolog.LevelFieldName = "LEVEL"
@@ -26,16 +25,22 @@ func Get(flag ...bool) zerolog.Logger {
 					break
 				}
 			}
-			file = short
-			return file + ":" + strconv.Itoa(line)
-		}
-		if flag[0] {
-			log = zerolog.New(os.Stdout).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stdout})
-		} else {
-			log = zerolog.New(os.Stdout).Level(zerolog.InfoLevel).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stdout})
+			return short + ":" + strconv.Itoa(line)
 		}
 
+		logLevel := zerolog.InfoLevel
+		if len(debug) > 0 && debug[0] {
+			logLevel = zerolog.DebugLevel
+		}
+
+		log = zerolog.New(os.Stdout).
+			Level(logLevel).
+			With().
+			Timestamp().
+			Caller().
+			Logger().
+			Output(zerolog.ConsoleWriter{Out: os.Stdout})
+
 	})
-	fmt.Println("return logger")
 	return log
 }
