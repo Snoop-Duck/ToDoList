@@ -56,7 +56,7 @@ func New(cfg *internal.Config, repo Repository, repoNote RepositoryNote) *NotesA
 		cfg:       cfg,
 		repo:      repo,
 		repoNote:  repoNote,
-		log: log,
+		log:       log,
 	}
 	notesAPI.configRoutes()
 	return &notesAPI
