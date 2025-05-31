@@ -11,6 +11,10 @@ func (im *InMemoryNotes) AddNote(note notes.Note) error {
 		}
 	}
 	im.noteStorage[note.NID] = note
+
+	if err := im.SaveToFile(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -34,6 +38,10 @@ func (im *InMemoryNotes) DeleteNote(noteID string) error {
 		return notes.ErrNoteNotFound
 	}
 	delete(im.noteStorage, noteID)
+
+	if err := im.SaveToFile(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -42,5 +50,9 @@ func (im *InMemoryNotes) UpdateNote(noteID string, note notes.Note) error {
 		return notes.ErrNoteNotFound
 	}
 	im.noteStorage[noteID] = note
+
+	if err := im.SaveToFile(); err != nil {
+		return err
+	}
 	return nil
 }
