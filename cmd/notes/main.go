@@ -33,7 +33,7 @@ func main() {
 	}
 
 	var repoUser server.Repository
-	repoNote := inmemory.NewNotes("storage/notes.json")
+	repoNote := inmemory.NewNotes(cfg.Debug, "storage/notes.json")
 	repoUser, err = dbstorage.New(context.Background(), dns)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to connect to db. Use in memory storage")

@@ -24,11 +24,11 @@ type InMemoryUsers struct {
 	log         zerolog.Logger
 }
 
-func NewNotes(filePath string) *InMemoryNotes {
+func NewNotes(debug bool, filePath string) *InMemoryNotes {
 	storage := &InMemoryNotes{
 		noteStorage: make(map[string]notes.Note),
 		filePath:    filePath,
-		log:         logger.Get(false),
+		log:         logger.Get(debug),
 	}
 
 	if err := storage.loadFromFile(); err != nil {
@@ -40,7 +40,7 @@ func NewNotes(filePath string) *InMemoryNotes {
 func NewUsers() *InMemoryUsers {
 	return &InMemoryUsers{
 		userStorage: make(map[string]users.User),
-		log:         logger.Get(false),
+		log:         logger.Get(),
 	}
 }
 

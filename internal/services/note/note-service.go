@@ -8,7 +8,7 @@ import (
 
 type RepositoryNote interface {
 	AddNote(note notes.Note) error
-	GetNotes() (map[string]notes.Note, error)
+	GetNotes() ([]notes.Note, error)
 	GetNoteID(noteID string) (notes.Note, error)
 	DeleteNote(noteID string) error
 	UpdateNote(noteID string, note notes.Note) error
@@ -31,7 +31,7 @@ func (ns *NoteService) CreateNote(note notes.Note) (string, error) {
 	return note.NID, nil
 }
 
-func (ns *NoteService) GetNotes() (map[string]notes.Note, error) {
+func (ns *NoteService) GetNotes() ([]notes.Note, error) {
 	notes, err := ns.repo.GetNotes()
 	if err != nil {
 		return nil, err

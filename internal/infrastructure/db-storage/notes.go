@@ -19,7 +19,7 @@ func (db *DBStorage) AddNote(notes notes.Note) error {
 	return nil
 }
 
-func (db *DBStorage) GetNotes() (map[string]notes.Note, error) {
+func (db *DBStorage) GetNotes() ([]notes.Note, error) {
 	log := logger.Get()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -30,16 +30,16 @@ func (db *DBStorage) GetNotes() (map[string]notes.Note, error) {
 		return nil, err
 	}
 
-	var notesMap = make(map[string]notes.Note)
+	var notesSlice []notes.Note
 	for rows.Next() {
 		var note notes.Note
 		if err := rows.Scan(&note.NID, &note.Title, &note.Description, &note.Status, &note.Created_at, &note.UID); err != nil {
 			log.Error().Err(err).Msg("failed to scan note")
 			return nil, err
 		}
-		notesMap[note.NID] = note
+		notesSlice = append(notesSlice, note)
 	}
-	return notesMap, nil
+	return notesSlice, nil
 }
 
 func (db *DBStorage) GetNoteID(noteID string) (notes.Note, error) {

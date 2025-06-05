@@ -22,7 +22,7 @@ type Repository interface {
 	SaveUser(user users.User) error
 	GetUser(login string) (users.User, error)
 	DeleteUser(userID string) error
-	GetAllUsers() (map[string]users.User, error)
+	GetAllUsers() ([]users.User, error)
 	GetUserID(userID string) (users.User, error)
 	UpdateUserID(userID string, user users.User) error
 	Close() error
@@ -30,7 +30,7 @@ type Repository interface {
 
 type RepositoryNote interface {
 	AddNote(note notes.Note) error
-	GetNotes() (map[string]notes.Note, error)
+	GetNotes() ([]notes.Note, error)
 	GetNoteID(noteID string) (notes.Note, error)
 	DeleteNote(noteID string) error
 	UpdateNote(noteID string, note notes.Note) error

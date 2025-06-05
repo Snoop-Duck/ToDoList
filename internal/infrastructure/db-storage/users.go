@@ -46,7 +46,7 @@ func (db *DBStorage) DeleteUser(userID string) error {
 	return nil
 }
 
-func (db *DBStorage) GetAllUsers() (map[string]users.User, error) {
+func (db *DBStorage) GetAllUsers() ([]users.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -54,15 +54,16 @@ func (db *DBStorage) GetAllUsers() (map[string]users.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var usersMap = make(map[string]users.User)
+
+	var usersSlice []users.User
 	for rows.Next() {
 		var user users.User
 		if err := rows.Scan(&user.UID, &user.Name, &user.Email, &user.Password); err != nil {
 			return nil, err
 		}
-		usersMap[user.UID] = user
+		usersSlice = append(usersSlice, user)
 	}
-	return usersMap, nil
+	return usersSlice, nil
 }
 
 func (db *DBStorage) GetUserID(userID string) (users.User, error) {
