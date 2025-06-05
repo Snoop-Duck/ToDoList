@@ -10,7 +10,7 @@ type Repository interface {
 	SaveUser(user users.User) error
 	GetUser(login string) (users.User, error)
 	DeleteUser(userID string) error
-	GetAllUsers() (map[string]users.User, error)
+	GetAllUsers() ([]users.User, error)
 	GetUserID(userID string) (users.User, error)
 	UpdateUserID(userID string, user users.User) error
 }
@@ -54,7 +54,7 @@ func (us *UserService) DeleteUserID(userID string) error {
 	return nil
 }
 
-func (us *UserService) GetUsers() (map[string]users.User, error) {
+func (us *UserService) GetUsers() ([]users.User, error) {
 	return us.repo.GetAllUsers()
 }
 

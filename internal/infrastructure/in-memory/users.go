@@ -32,11 +32,17 @@ func (im *InMemoryUsers) DeleteUser(userID string) error {
 	return nil
 }
 
-func (im *InMemoryUsers) GetAllUsers() (map[string]users.User, error) {
+func (im *InMemoryUsers) GetAllUsers() ([]users.User, error) {
 	if len(im.userStorage) == 0 {
 		return nil, users.ErrNoUsersAvailable
 	}
-	return im.userStorage, nil
+
+	usersSlice := make([]users.User, 0, len(im.userStorage))
+	for _, note := range im.userStorage {
+		usersSlice = append(usersSlice, note)
+	}
+
+	return usersSlice, nil
 }
 
 func (im *InMemoryUsers) GetUserID(userID string) (users.User, error) {
