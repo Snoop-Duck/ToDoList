@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"strconv"
 	"time"
 
@@ -20,13 +21,19 @@ import (
 )
 
 func main() {
-	cfg := internal.ReadConfig()
+	cfg, err := internal.ReadConfig()
+	if err != nil {
+		panic(err)
+	}
 
 	log := logger.Get(cfg.Debug)
 
 	log.Info().Msg("service starting")
 
-	dns := "postgres://user:password@localhost:5432/notes?sslmode=disable"
+	dns := os.Getenv("DB_CONNECTION_STRING")
+	if dns == "" {
+		dns = "postgres://user:password@db:5432/notes?sslmode=disable"
+	}
 	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to database")
