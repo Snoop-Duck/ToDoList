@@ -1,19 +1,50 @@
 package internal
 
-import "flag"
+import (
+	"cmp"
+	"flag"
+	"os"
+	"strconv"
+)
 
 type Config struct {
-	Host  string
-	Port  int
-	Debug bool
+	Host      string
+	Port      int
+	Debug     bool
+	DBConnStr string
 }
 
-func ReadConfig() *Config {
+const (
+	defaultHost = "0.0.0.0"
+	defaultPort = 8080
+	defaultDB   = "postgres://user.password@localhost:5432/notes?sslmode=disable"
+)
+
+func ReadConfig() (*Config, error) {
 	var cfg Config
-	flag.StringVar(&cfg.Host, "host", "0.0.0.0", "flag for configure host")
-	flag.IntVar(&cfg.Port, "port", 8080, "flag for configure port")
+	flag.StringVar(&cfg.Host, "host", defaultHost, "flag for configure host")
+	flag.IntVar(&cfg.Port, "port", defaultPort, "flag for configure port")
 	flag.BoolVar(&cfg.Debug, "debug", false, "enable debug logger level")
+	flag.StringVar(&cfg.DBConnStr, "db", defaultDB, "flag for configure db connection string")
+
 	flag.Parse()
 
-	return &cfg
+	if cfg.Host == defaultHost {
+		cfg.Host = cmp.Or(os.Getenv("NOTES_HOST"), defaultHost)
+	}
+
+	if cfg.Port == defaultPort {
+		port := cmp.Or(os.Getenv("NOTES_PORT"), strconv.Itoa(defaultPort))
+		portInt, err := strconv.Atoi(port)
+		if err != nil {
+			return nil, err
+		}
+		cfg.Port = portInt
+	}
+
+	if cfg.DBConnStr == defaultDB {
+		cfg.DBConnStr = cmp.Or(os.Getenv("NOTES_DB"), defaultDB)
+	}
+
+	return &cfg, nil
 }

@@ -11,14 +11,24 @@ func (im *InMemoryNotes) AddNote(note notes.Note) error {
 		}
 	}
 	im.noteStorage[note.NID] = note
+
+	if err := im.SaveToFile(); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (im *InMemoryNotes) GetNotes() (map[string]notes.Note, error) {
+func (im *InMemoryNotes) GetNotes() ([]notes.Note, error) {
 	if len(im.noteStorage) == 0 {
 		return nil, notes.ErrNoNotesAvailable
 	}
-	return im.noteStorage, nil
+
+	notesSlice := make([]notes.Note, 0, len(im.noteStorage))
+	for _, note := range im.noteStorage {
+		notesSlice = append(notesSlice, note)
+	}
+
+	return notesSlice, nil
 }
 
 func (im *InMemoryNotes) GetNoteID(noteID string) (notes.Note, error) {
@@ -34,6 +44,10 @@ func (im *InMemoryNotes) DeleteNote(noteID string) error {
 		return notes.ErrNoteNotFound
 	}
 	delete(im.noteStorage, noteID)
+
+	if err := im.SaveToFile(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -42,5 +56,9 @@ func (im *InMemoryNotes) UpdateNote(noteID string, note notes.Note) error {
 		return notes.ErrNoteNotFound
 	}
 	im.noteStorage[noteID] = note
+
+	if err := im.SaveToFile(); err != nil {
+		return err
+	}
 	return nil
 }
