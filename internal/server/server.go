@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Dorrrke/notes-g2/pkg/logger"
@@ -13,6 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/rs/zerolog"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -74,6 +76,27 @@ func (nApi *NotesAPI) Stop(ctx context.Context) error {
 func (nApi *NotesAPI) configRoutes() {
 	nApi.log.Debug().Msg("configure routes")
 	router := gin.Default()
+
+	router.Use(gzip.Gzip(
+		gzip.BestSpeed,
+		gzip.WithDecompressFn(gzip.DefaultDecompressHandle),
+	))
+
+	router.Use(gzip.Gzip(
+		gzip.BestSpeed,
+		gzip.WithExcludedExtensions([]string{".png", ".gif", ".jpeg", ".jpg"}),
+		gzip.WithExcludedPaths([]string{"/metrics"}),
+	))
+
+	router.Use(func(c *gin.Context) {
+		contentType := c.Writer.Header().Get("Content-Type")
+		if !strings.Contains(contentType, "application/json") &&
+			!strings.Contains(contentType, "text/html") {
+			c.Header("Content-Encoding", "identity")
+		}
+		c.Next()
+	})
+
 	router.GET("/")
 	users := router.Group("/users")
 	{
