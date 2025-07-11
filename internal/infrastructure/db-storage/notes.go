@@ -12,7 +12,8 @@ func (db *DBStorage) AddNote(notes notes.Note) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := db.db.Exec(ctx, "INSERT INTO note(nid, title, description, status, created_at, user_id)")
+	_, err := db.db.Exec(ctx, "INSERT INTO note(nid, title, description, status, created_at, uid, deleted) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		notes.NID, notes.Title, notes.Description, notes.Status, notes.Created_at, notes.UID, false)
 	if err != nil {
 		return err
 	}
@@ -24,11 +25,12 @@ func (db *DBStorage) GetNotes() ([]notes.Note, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rows, err := db.db.Query(ctx, "SELECT * FROM notes")
+	rows, err := db.db.Query(ctx, "SELECT nid, title, description, status, created_at, uid FROM notes WHERE deleted = false")
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get notes")
 		return nil, err
 	}
+	defer rows.Close()
 
 	var notesSlice []notes.Note
 	for rows.Next() {
@@ -49,7 +51,8 @@ func (db *DBStorage) GetNoteID(noteID string) (notes.Note, error) {
 
 	var note notes.Note
 
-	row := db.db.QueryRow(ctx, "SELECT * FROM notes WHERE nid = $1", noteID)
+	row := db.db.QueryRow(ctx,
+		"SELECT nid, title, description, status, created_at, uid FROM notes WHERE nid = $1 AND deleted = false", noteID)
 	err := row.Scan(&note.NID, &note.Title, &note.Description, &note.Status, &note.Created_at, &note.UID)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get note")
@@ -62,10 +65,17 @@ func (db *DBStorage) DeleteNote(noteID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := db.db.Exec(ctx, "DELETE FROM notes WHERE nid = $1", noteID)
+	_, err := db.db.Exec(ctx,
+		"UPDATE notes SET deleted = true WHERE nid = $1 AND deleted = false", noteID)
 	if err != nil {
 		return err
 	}
+
+	select {
+	case db.deleteChan <- struct{}{}:
+	default:
+	}
+
 	return nil
 }
 
@@ -73,9 +83,8 @@ func (db *DBStorage) UpdateNote(noteID string, note notes.Note) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := db.db.Exec(ctx, "UPDATE notes SET title = $1, description = $2, status = $3 WHERE nid = $4", note.Title, note.Description, note.Status, note.NID)
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err := db.db.Exec(ctx,
+		"UPDATE notes SET title = $1, description = $2, status = $3 WHERE nid = $4 AND deleted = false",
+		note.Title, note.Description, note.Status, note.NID)
+	return err
 }
