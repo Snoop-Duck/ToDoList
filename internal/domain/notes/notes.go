@@ -9,6 +9,7 @@ type Note struct {
 	Status      Status    `json:"status"`
 	Created_at  time.Time `json:"created_at"`
 	UID         string    `json:"uid"`
+	Deleted     bool      `json:"deleted"`
 }
 type NoteResponseFormat struct {
 	Title       string `json:"title"`

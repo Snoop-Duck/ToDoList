@@ -13,6 +13,7 @@ type Repository interface {
 	GetAllUsers() ([]users.User, error)
 	GetUserID(userID string) (users.User, error)
 	UpdateUserID(userID string, user users.User) error
+	Close() error
 }
 
 type UserService struct {
