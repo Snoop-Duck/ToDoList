@@ -44,10 +44,16 @@ type NotesAPI struct {
 	repo      Repository
 	repoNote  RepositoryNote
 	log       zerolog.Logger
+	testMode  bool
 }
 
 func New(cfg *internal.Config, repo Repository, repoNote RepositoryNote) *NotesAPI {
-	log := logger.Get(cfg.Debug)
+	var log zerolog.Logger
+	if cfg != nil {
+		log = logger.Get(cfg.Debug)
+	} else {
+		log = zerolog.Nop() // для тестов
+	}
 	log.Debug().Msg("configure Notes API server")
 	httpServe := http.Server{
 		Addr: fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
@@ -120,6 +126,12 @@ func (nApi *NotesAPI) configRoutes() {
 
 func (nApi *NotesAPI) JWTMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		if nApi.testMode {
+			ctx.Set("uid", "test-user")
+			ctx.Next()
+			return
+		}
+
 		token := ctx.GetHeader("Authorization")
 		if token == `` {
 			nApi.log.Error().Msg("token not found")

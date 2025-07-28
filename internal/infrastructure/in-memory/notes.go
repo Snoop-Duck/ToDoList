@@ -7,7 +7,7 @@ import (
 func (im *InMemoryNotes) AddNote(note notes.Note) error {
 	for _, id := range im.noteStorage {
 		if id.Title == note.Title {
-			return notes.ErrNoteAlredyExists
+			return notes.ErrNoteAlreadyExists
 		}
 	}
 	im.noteStorage[note.NID] = note
