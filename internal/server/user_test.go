@@ -110,49 +110,6 @@ func TestLogin(t *testing.T) {
 	}
 }
 
-func BenchmarkLogin(b *testing.B) {
-	var srv NotesAPI
-
-	gin.DefaultWriter = io.Discard
-	gin.DisableConsoleColor()
-	testRouter := gin.New()
-
-	testRouter.Use(gin.Recovery())
-
-	testRouter.POST("/login", srv.login)
-
-	httpTest := httptest.NewServer(testRouter)
-	defer httpTest.Close()
-
-	uReq := users.UserRequest{
-		Email:    "email",
-		Password: "password",
-	}
-	dbUser := users.User{
-		UID:      "uuid-1234-55rr",
-		Name:     "John Doe",
-		Email:    "email",
-		Password: "password",
-	}
-
-	mockRepo := mocks.NewRepository(b)
-	mockRepo.On("GetUser", uReq.Email).Return(dbUser, nil)
-	srv.repo = mockRepo
-
-	req := resty.New().R()
-	req.Method = http.MethodPost
-	req.URL = httpTest.URL + "/login"
-
-	body, err := json.Marshal(uReq)
-	assert.NoError(b, err)
-	req.Body = body
-
-	// b.ResetTimer()
-	for range b.N {
-		req.Send()
-	}
-}
-
 func TestReqister(t *testing.T) {
 	var srv NotesAPI
 
@@ -491,5 +448,227 @@ func TestUpdateUserIDHandler(t *testing.T) {
 			resp, _ := req.Send()
 			assert.Equal(t, tt.wantCode, resp.StatusCode())
 		})
+	}
+}
+
+func BenchmarkLogin(b *testing.B) {
+	var srv NotesAPI
+
+	gin.DefaultWriter = io.Discard
+	gin.DisableConsoleColor()
+	testRouter := gin.New()
+
+	testRouter.Use(gin.Recovery())
+
+	testRouter.POST("/login", srv.login)
+
+	httpTest := httptest.NewServer(testRouter)
+	defer httpTest.Close()
+
+	uReq := users.UserRequest{
+		Email:    "email",
+		Password: "password",
+	}
+	dbUser := users.User{
+		UID:      "uuid-1234-55rr",
+		Name:     "John Doe",
+		Email:    "email",
+		Password: "password",
+	}
+
+	mockRepo := mocks.NewRepository(b)
+	mockRepo.On("GetUser", uReq.Email).Return(dbUser, nil)
+	srv.repo = mockRepo
+
+	req := resty.New().R()
+	req.Method = http.MethodPost
+	req.URL = httpTest.URL + "/login"
+
+	body, err := json.Marshal(uReq)
+	assert.NoError(b, err)
+	req.Body = body
+
+	b.ResetTimer()
+	for range b.N {
+		req.Send()
+	}
+}
+
+func BenchmarkRegister(b *testing.B) {
+	var srv NotesAPI
+
+	gin.DefaultWriter = io.Discard
+	gin.DisableConsoleColor()
+	testRouter := gin.New()
+
+	testRouter.Use(gin.Recovery())
+
+	testRouter.POST("/register", srv.register)
+
+	httpTest := httptest.NewServer(testRouter)
+	defer httpTest.Close()
+
+	uReq := users.User{
+		UID:      "uuid-1234-55rr",
+		Name:     "John Doe",
+		Email:    "email",
+		Password: "password",
+	}
+
+	mockRepo := mocks.NewRepository(b)
+	mockRepo.On("SaveUser", mock.Anything).Return(nil)
+	srv.repo = mockRepo
+
+	req := resty.New().R()
+	req.Method = http.MethodPost
+	req.URL = httpTest.URL + "/register"
+
+	body, err := json.Marshal(uReq)
+	assert.NoError(b, err)
+	req.Body = body
+
+	b.ResetTimer()
+	for range b.N {
+		req.Send()
+	}
+}
+
+func BenchmarkGetUserID(b *testing.B) {
+	var srv NotesAPI
+
+	gin.DefaultWriter = io.Discard
+	gin.DisableConsoleColor()
+	testRouter := gin.New()
+
+	testRouter.Use(gin.Recovery())
+
+	testRouter.GET("/profile/:id", srv.getUserID)
+
+	httpTest := httptest.NewServer(testRouter)
+	defer httpTest.Close()
+
+	testUser := users.User{
+		UID:   "123",
+		Name:  "Test User",
+		Email: "test@example.com",
+	}
+
+	mockRepo := mocks.NewRepository(b)
+	mockRepo.On("GetUserID", "123").Return(testUser, nil)
+	srv.repo = mockRepo
+
+	req := resty.New().R()
+	req.Method = http.MethodGet
+	req.URL = httpTest.URL + "/profile/123"
+
+	b.ResetTimer()
+	for range b.N {
+		req.Send()
+	}
+}
+
+func BenchmarkDeleteUser(b *testing.B) {
+	var srv NotesAPI
+
+	gin.DefaultWriter = io.Discard
+	gin.DisableConsoleColor()
+	testRouter := gin.New()
+
+	testRouter.Use(gin.Recovery())
+
+	testRouter.DELETE("/del/:id", srv.deleteUser)
+
+	httpTest := httptest.NewServer(testRouter)
+	defer httpTest.Close()
+
+	mockRepo := mocks.NewRepository(b)
+	mockRepo.On("DeleteUser", "123").Return(nil)
+	srv.repo = mockRepo
+
+	req := resty.New().R()
+	req.Method = http.MethodDelete
+	req.URL = httpTest.URL + "/del/123"
+
+	b.ResetTimer()
+	for range b.N {
+		req.Send()
+	}
+}
+
+func BenchmarkGetUsers(b *testing.B) {
+	var srv NotesAPI
+
+	gin.DefaultWriter = io.Discard
+	gin.DisableConsoleColor()
+	testRouter := gin.New()
+
+	testRouter.Use(gin.Recovery())
+
+	testRouter.GET("/profile", srv.getUsers)
+
+	httpTest := httptest.NewServer(testRouter)
+	defer httpTest.Close()
+
+	testUsers := []users.User{
+		{
+			UID:   "1",
+			Name:  "User 1",
+			Email: "user1@example.com",
+		},
+		{
+			UID:   "2",
+			Name:  "User 2",
+			Email: "user2@example.com",
+		},
+	}
+
+	mockRepo := mocks.NewRepository(b)
+	mockRepo.On("GetAllUsers").Return(testUsers, nil)
+	srv.repo = mockRepo
+
+	req := resty.New().R()
+	req.Method = http.MethodGet
+	req.URL = httpTest.URL + "/profile"
+
+	b.ResetTimer()
+	for range b.N {
+		req.Send()
+	}
+}
+
+func BenchmarkUpdateUserID(b *testing.B) {
+	var srv NotesAPI
+
+	gin.DefaultWriter = io.Discard
+	gin.DisableConsoleColor()
+	testRouter := gin.New()
+
+	testRouter.Use(gin.Recovery())
+
+	testRouter.PUT("/upd/:id", srv.updateUserID)
+
+	httpTest := httptest.NewServer(testRouter)
+	defer httpTest.Close()
+
+	uReq := users.User{
+		Name:  "Updated Name",
+		Email: "updated@example.com",
+	}
+
+	mockRepo := mocks.NewRepository(b)
+	mockRepo.On("UpdateUserID", "123", mock.Anything).Return(nil)
+	srv.repo = mockRepo
+
+	req := resty.New().R()
+	req.Method = http.MethodPut
+	req.URL = httpTest.URL + "/upd/123"
+
+	body, err := json.Marshal(uReq)
+	assert.NoError(b, err)
+	req.Body = body
+
+	b.ResetTimer()
+	for range b.N {
+		req.Send()
 	}
 }
