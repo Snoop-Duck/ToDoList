@@ -40,7 +40,7 @@ func TestAddNote(t *testing.T) {
 		Title:       "Test Note",
 		Description: "Test Content",
 		Status:      notes.New,
-		Created_at:  time.Now(),
+		CreatedAt:   time.Now(),
 		UID:         "user1",
 	}
 
@@ -78,7 +78,7 @@ func TestGetNotes(t *testing.T) {
 			Title:       "Note 1",
 			Description: "Content 1",
 			Status:      notes.Active,
-			Created_at:  now,
+			CreatedAt:   now,
 			UID:         "user1",
 		},
 		{
@@ -86,7 +86,7 @@ func TestGetNotes(t *testing.T) {
 			Title:       "Note 2",
 			Description: "Content 2",
 			Status:      notes.Inactive,
-			Created_at:  now,
+			CreatedAt:   now,
 			UID:         "user1",
 		},
 	}
@@ -120,7 +120,7 @@ func TestGetNoteID(t *testing.T) {
 		Title:       "Test Note",
 		Description: "Test Content",
 		Status:      notes.Active,
-		Created_at:  now,
+		CreatedAt:   now,
 		UID:         "user1",
 	}
 
@@ -128,14 +128,14 @@ func TestGetNoteID(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("note exists", func(t *testing.T) {
-		result, err := im.GetNoteID("1")
-		assert.NoError(t, err)
+		result, getErr := im.GetNoteID("1")
+		assert.NoError(t, getErr)
 		assert.Equal(t, testNote, result)
 	})
 
 	t.Run("note not found", func(t *testing.T) {
-		result, err := im.GetNoteID("999")
-		assert.ErrorIs(t, err, notes.ErrNoteNotFound)
+		result, getErr := im.GetNoteID("999")
+		assert.ErrorIs(t, getErr, notes.ErrNoteNotFound)
 		assert.Equal(t, notes.Note{}, result)
 	})
 }
@@ -150,7 +150,7 @@ func TestDeleteNote(t *testing.T) {
 		Title:       "Test Note",
 		Description: "Test Content",
 		Status:      notes.Active,
-		Created_at:  now,
+		CreatedAt:   now,
 		UID:         "user1",
 	}
 
@@ -158,12 +158,12 @@ func TestDeleteNote(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("successful delete", func(t *testing.T) {
-		err := im.DeleteNote("1")
+		err = im.DeleteNote("1")
 		assert.NoError(t, err)
 		assert.NotContains(t, im.noteStorage, "1")
 
-		data, err := os.ReadFile(tmpFile)
-		assert.NoError(t, err)
+		data, readErr := os.ReadFile(tmpFile)
+		assert.NoError(t, readErr)
 
 		var fileData map[string]notes.Note
 		err = json.Unmarshal(data, &fileData)
@@ -172,7 +172,7 @@ func TestDeleteNote(t *testing.T) {
 	})
 
 	t.Run("note not found", func(t *testing.T) {
-		err := im.DeleteNote("999")
+		err = im.DeleteNote("999")
 		assert.ErrorIs(t, err, notes.ErrNoteNotFound)
 	})
 }
@@ -186,7 +186,7 @@ func TestUpdateNote(t *testing.T) {
 		Title:       "Old Title",
 		Description: "Old Content",
 		Status:      notes.Active,
-		Created_at:  time.Now(),
+		CreatedAt:   time.Now(),
 		UID:         "user1",
 	}
 
@@ -199,12 +199,12 @@ func TestUpdateNote(t *testing.T) {
 	updatedNote.Status = notes.Inactive
 
 	t.Run("successful update", func(t *testing.T) {
-		err := im.UpdateNote("1", updatedNote)
+		err = im.UpdateNote("1", updatedNote)
 		assert.NoError(t, err)
 		assert.Equal(t, toComparer(updatedNote), toComparer(im.noteStorage["1"]))
 
-		data, err := os.ReadFile(tmpFile)
-		assert.NoError(t, err)
+		data, readErr := os.ReadFile(tmpFile)
+		assert.NoError(t, readErr)
 
 		var fileData map[string]notes.Note
 		err = json.Unmarshal(data, &fileData)
@@ -213,7 +213,7 @@ func TestUpdateNote(t *testing.T) {
 	})
 
 	t.Run("note not found", func(t *testing.T) {
-		err := im.UpdateNote("999", updatedNote)
+		err = im.UpdateNote("999", updatedNote)
 		assert.ErrorIs(t, err, notes.ErrNoteNotFound)
 	})
 }
@@ -226,7 +226,7 @@ func TestLoadFromFile(t *testing.T) {
 		Title:       "Loaded Note",
 		Description: "Loaded Content",
 		Status:      notes.New,
-		Created_at:  time.Now(),
+		CreatedAt:   time.Now(),
 		UID:         "user1",
 	}
 

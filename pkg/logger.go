@@ -8,9 +8,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var log zerolog.Logger
+type Logger = zerolog.Logger
 
-var once sync.Once
+var log zerolog.Logger //nolint:gochecknoglobals // its ok
+
+var once sync.Once //nolint:gochecknoglobals // its ok
 
 func Get(debug ...bool) zerolog.Logger {
 	once.Do(func() {
@@ -40,7 +42,6 @@ func Get(debug ...bool) zerolog.Logger {
 			Caller().
 			Logger().
 			Output(zerolog.ConsoleWriter{Out: os.Stdout})
-
 	})
 	return log
 }

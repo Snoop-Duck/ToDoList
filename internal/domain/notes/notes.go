@@ -7,7 +7,7 @@ type Note struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Status      Status    `json:"status"`
-	Created_at  time.Time `json:"created_at"`
+	CreatedAt   time.Time `json:"created_at"`
 	UID         string    `json:"uid"`
 	Deleted     bool      `json:"deleted"`
 }
@@ -15,7 +15,7 @@ type NoteResponseFormat struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
-	Created_at  string `json:"created_at"`
+	CreatedAt   string `json:"created_at"`
 	UID         string `json:"uid"`
 }
 
@@ -24,7 +24,7 @@ func NoteResponse(note Note) NoteResponseFormat {
 		Title:       note.Title,
 		Description: note.Description,
 		Status:      note.Status.String(),
-		Created_at:  note.Created_at.Format(time.RFC3339),
+		CreatedAt:   note.CreatedAt.Format(time.RFC3339),
 		UID:         note.UID,
 	}
 }

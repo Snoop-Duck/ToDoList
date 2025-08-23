@@ -2,10 +2,17 @@ package dbstorage
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
+	"github.com/Dorrrke/notes-g2/pkg/logger"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/rs/zerolog"
+
+	// Импорт драйвера PostgreSQL для миграций.
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	// Импорт драйвера PostgreSQL для database/sql.
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,6 +26,7 @@ type DBStorage struct {
 	db         *pgxpool.Pool
 	deleteChan chan struct{}
 	stopChan   chan struct{}
+	log        zerolog.Logger
 }
 
 func New(ctx context.Context, addr string) (*DBStorage, error) {
@@ -31,6 +39,7 @@ func New(ctx context.Context, addr string) (*DBStorage, error) {
 		db:         pool,
 		deleteChan: make(chan struct{}, deleteChanSize),
 		stopChan:   make(chan struct{}),
+		log:        logger.Get(),
 	}
 
 	go storage.startBatchDeleter()
@@ -51,8 +60,8 @@ func ApplyMigrations(addr string) error {
 	}
 	defer m.Close()
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return err
+	if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return fmt.Errorf("failed to apply migrations: %w", err)
 	}
 	return nil
 }
@@ -64,27 +73,37 @@ func (db *DBStorage) startBatchDeleter() {
 	for {
 		select {
 		case <-db.stopChan:
-			db.processBatchDeletion()
+			if err := db.processBatchDeletion(); err != nil {
+				db.log.Error().Err(err).Msg("failed to process batch deletion on shutdown: %v")
+			}
 			return
 		case <-ticker.C:
-			db.processBatchDeletion()
+			if err := db.processBatchDeletion(); err != nil {
+				db.log.Error().Err(err).Msg("failed to process batch deletion: %v")
+			}
 		case <-db.deleteChan:
 			if len(db.deleteChan) >= deleteBatchSize-1 {
-				db.processBatchDeletion()
+				if err := db.processBatchDeletion(); err != nil {
+					db.log.Error().Err(err).Msg("failed to process batch deletion: %v")
+				}
 			}
 		}
 	}
 }
 
 func (db *DBStorage) processBatchDeletion() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	tx, err := db.db.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if rollbackErr := tx.Rollback(ctx); rollbackErr != nil {
+			db.log.Error().Err(rollbackErr).Msg("failed to rollback transaction: %v")
+		}
+	}()
 
 	_, err = tx.Exec(ctx, `
 		DELETE FROM notes 

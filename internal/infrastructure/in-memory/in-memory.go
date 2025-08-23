@@ -11,21 +11,21 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type InMemoryNotes struct {
+type Notes struct {
 	noteStorage map[string]notes.Note
 	filePath    string
 	log         zerolog.Logger
 }
 
-var emtyUser = users.User{}
+var emtyUser = users.User{} //nolint:gochecknoglobals // its ok
 
-type InMemoryUsers struct {
+type Users struct {
 	userStorage map[string]users.User
 	log         zerolog.Logger
 }
 
-func NewNotes(debug bool, filePath string) *InMemoryNotes {
-	storage := &InMemoryNotes{
+func NewNotes(debug bool, filePath string) *Notes {
+	storage := &Notes{
 		noteStorage: make(map[string]notes.Note),
 		filePath:    filePath,
 		log:         logger.Get(debug),
@@ -37,14 +37,14 @@ func NewNotes(debug bool, filePath string) *InMemoryNotes {
 	return storage
 }
 
-func NewUsers() *InMemoryUsers {
-	return &InMemoryUsers{
+func NewUsers() *Users {
+	return &Users{
 		userStorage: make(map[string]users.User),
 		log:         logger.Get(),
 	}
 }
 
-func (im *InMemoryNotes) loadFromFile() error {
+func (im *Notes) loadFromFile() error {
 	if _, err := os.Stat(im.filePath); os.IsNotExist(err) {
 		im.log.Debug().Msg("Файл хранилища не существует, будет создан новый")
 		return nil
@@ -56,7 +56,7 @@ func (im *InMemoryNotes) loadFromFile() error {
 		return fmt.Errorf("ошибка чтения файла: %w", err)
 	}
 
-	if err := json.Unmarshal(data, &im.noteStorage); err != nil {
+	if err = json.Unmarshal(data, &im.noteStorage); err != nil {
 		im.log.Error().Err(err).Msg("Ошибка парсинга JSON")
 		return fmt.Errorf("ошибка парсинга JSON: %w", err)
 	}
@@ -64,14 +64,14 @@ func (im *InMemoryNotes) loadFromFile() error {
 	return nil
 }
 
-func (im *InMemoryNotes) SaveToFile() error {
+func (im *Notes) SaveToFile() error {
 	data, err := json.MarshalIndent(im.noteStorage, "", " ")
 	if err != nil {
 		im.log.Error().Err(err).Msg("Ошибка сериализации")
 		return fmt.Errorf("ошибка сериализации: %w", err)
 	}
 
-	if err := os.WriteFile(im.filePath, data, 0644); err != nil {
+	if err = os.WriteFile(im.filePath, data, 0600); err != nil {
 		im.log.Error().Err(err).Msg("Ошибка записи в файл")
 		return fmt.Errorf("ошибка записи: %w", err)
 	}

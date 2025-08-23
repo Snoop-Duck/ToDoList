@@ -11,7 +11,6 @@ import (
 )
 
 func (s *NotesAPI) login(ctx *gin.Context) {
-
 	var uReq users.UserRequest
 
 	if err := ctx.ShouldBindJSON(&uReq); err != nil {

@@ -27,14 +27,14 @@ func (s *SyncDB) SyncToDB() error {
 	}
 
 	var fileNotes map[string]notes.Note
-	if err := json.Unmarshal(data, &fileNotes); err != nil {
+	if err = json.Unmarshal(data, &fileNotes); err != nil {
 		return err
 	}
 
 	for _, note := range fileNotes {
-		if err := s.db.Create(&note).Error; err != nil {
+		if err = s.db.Create(&note).Error; err != nil {
 			continue
 		}
 	}
-	return os.WriteFile(s.notesFile, []byte("{}"), 0644)
+	return os.WriteFile(s.notesFile, []byte("{}"), 0600)
 }

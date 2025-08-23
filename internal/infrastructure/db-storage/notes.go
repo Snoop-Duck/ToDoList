@@ -8,8 +8,12 @@ import (
 	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 )
 
+const (
+	contextTimeout = 5 * time.Second
+)
+
 func (db *DBStorage) AddNote(notes notes.Note) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	_, err := db.db.Exec(
@@ -19,7 +23,7 @@ func (db *DBStorage) AddNote(notes notes.Note) error {
 		notes.Title,
 		notes.Description,
 		notes.Status,
-		notes.Created_at,
+		notes.CreatedAt,
 		notes.UID,
 		false,
 	)
@@ -31,7 +35,7 @@ func (db *DBStorage) AddNote(notes notes.Note) error {
 
 func (db *DBStorage) GetNotes() ([]notes.Note, error) {
 	log := logger.Get()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	rows, err := db.db.Query(
@@ -47,7 +51,7 @@ func (db *DBStorage) GetNotes() ([]notes.Note, error) {
 	var notesSlice []notes.Note
 	for rows.Next() {
 		var note notes.Note
-		if err := rows.Scan(&note.NID, &note.Title, &note.Description, &note.Status, &note.Created_at, &note.UID); err != nil {
+		if err = rows.Scan(&note.NID, &note.Title, &note.Description, &note.Status, &note.CreatedAt, &note.UID); err != nil {
 			log.Error().Err(err).Msg("failed to scan note")
 			return nil, err
 		}
@@ -58,14 +62,14 @@ func (db *DBStorage) GetNotes() ([]notes.Note, error) {
 
 func (db *DBStorage) GetNoteID(noteID string) (notes.Note, error) {
 	log := logger.Get()
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	var note notes.Note
 
 	row := db.db.QueryRow(ctx,
 		"SELECT nid, title, description, status, created_at, uid FROM notes WHERE nid = $1 AND deleted = false", noteID)
-	err := row.Scan(&note.NID, &note.Title, &note.Description, &note.Status, &note.Created_at, &note.UID)
+	err := row.Scan(&note.NID, &note.Title, &note.Description, &note.Status, &note.CreatedAt, &note.UID)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get note")
 		return notes.Note{}, err
@@ -74,7 +78,7 @@ func (db *DBStorage) GetNoteID(noteID string) (notes.Note, error) {
 }
 
 func (db *DBStorage) DeleteNote(noteID string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	_, err := db.db.Exec(ctx,
@@ -91,8 +95,8 @@ func (db *DBStorage) DeleteNote(noteID string) error {
 	return nil
 }
 
-func (db *DBStorage) UpdateNote(noteID string, note notes.Note) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (db *DBStorage) UpdateNote(_ string, note notes.Note) error {
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	_, err := db.db.Exec(ctx,

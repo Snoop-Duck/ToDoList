@@ -9,7 +9,7 @@ const (
 	Deleted
 )
 
-var Statuses = []string{"New", "Active", "Inactive", "Deleted"}
+var Statuses = []string{"New", "Active", "Inactive", "Deleted"} //nolint:gochecknoglobals // its ok
 
 func (s Status) String() string {
 	return Statuses[s]

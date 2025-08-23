@@ -2,15 +2,16 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/Dorrrke/notes-g2/pkg/logger"
 	"github.com/Snoop-Duck/ToDoList/internal"
 	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
+	logger "github.com/Snoop-Duck/ToDoList/pkg"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/rs/zerolog"
 
@@ -18,7 +19,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var jwtKey = []byte("my_secret_key")
+const (
+	tokenExpirationHours = 3
+	readHeaderTimeout    = 30 * time.Second
+)
+
+var jwtKey = []byte("my_secret_key") //nolint:gochecknoglobals // its ok
 
 type Repository interface {
 	SaveUser(user users.User) error
@@ -56,7 +62,8 @@ func New(cfg *internal.Config, repo Repository, repoNote RepositoryNote) *NotesA
 	}
 	log.Debug().Msg("configure Notes API server")
 	httpServe := http.Server{
-		Addr: fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Addr:              fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	notesAPI := NotesAPI{
@@ -153,7 +160,7 @@ func (nApi *NotesAPI) JWTMiddleware() gin.HandlerFunc {
 func jwtToken(uid string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Subject:   uid,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 3)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenExpirationHours)),
 	})
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
@@ -164,15 +171,15 @@ func jwtToken(uid string) (string, error) {
 
 func validateJwtToken(tokenString string) (string, error) {
 	claims := jwt.RegisteredClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtKey), nil
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(_ *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
 	})
 	if err != nil {
 		return ``, err
 	}
 
 	if !token.Valid {
-		return ``, fmt.Errorf("invalid token")
+		return ``, errors.New("invalid token")
 	}
 
 	return claims.Subject, nil

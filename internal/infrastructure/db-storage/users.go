@@ -2,13 +2,12 @@ package dbstorage
 
 import (
 	"context"
-	"time"
 
 	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 )
 
 func (db *DBStorage) SaveUser(user users.User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	_, err := db.db.Exec(
@@ -28,7 +27,7 @@ func (db *DBStorage) SaveUser(user users.User) error {
 }
 
 func (db *DBStorage) GetUser(login string) (users.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	var user users.User
@@ -43,7 +42,7 @@ func (db *DBStorage) GetUser(login string) (users.User, error) {
 }
 
 func (db *DBStorage) DeleteUser(userID string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	_, err := db.db.Exec(ctx, "DELETE FROM users WHERE id = $1", userID)
@@ -54,7 +53,7 @@ func (db *DBStorage) DeleteUser(userID string) error {
 }
 
 func (db *DBStorage) GetAllUsers() ([]users.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	rows, err := db.db.Query(ctx, "SELECT * FROM users")
@@ -65,7 +64,7 @@ func (db *DBStorage) GetAllUsers() ([]users.User, error) {
 	var usersSlice []users.User
 	for rows.Next() {
 		var user users.User
-		if err := rows.Scan(&user.UID, &user.Name, &user.Email, &user.Password); err != nil {
+		if err = rows.Scan(&user.UID, &user.Name, &user.Email, &user.Password); err != nil {
 			return nil, err
 		}
 		usersSlice = append(usersSlice, user)
@@ -74,7 +73,7 @@ func (db *DBStorage) GetAllUsers() ([]users.User, error) {
 }
 
 func (db *DBStorage) GetUserID(userID string) (users.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	var user users.User
@@ -87,7 +86,7 @@ func (db *DBStorage) GetUserID(userID string) (users.User, error) {
 }
 
 func (db *DBStorage) UpdateUserID(userID string, user users.User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	_, err := db.db.Exec(ctx, "UPDATE users SET name = $1, email = $2 WHERE uid = $3", user.Name, user.Email, userID)

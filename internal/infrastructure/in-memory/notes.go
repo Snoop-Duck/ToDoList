@@ -4,7 +4,7 @@ import (
 	"github.com/Snoop-Duck/ToDoList/internal/domain/notes"
 )
 
-func (im *InMemoryNotes) AddNote(note notes.Note) error {
+func (im *Notes) AddNote(note notes.Note) error {
 	for _, id := range im.noteStorage {
 		if id.Title == note.Title {
 			return notes.ErrNoteAlreadyExists
@@ -18,7 +18,7 @@ func (im *InMemoryNotes) AddNote(note notes.Note) error {
 	return nil
 }
 
-func (im *InMemoryNotes) GetNotes() ([]notes.Note, error) {
+func (im *Notes) GetNotes() ([]notes.Note, error) {
 	if len(im.noteStorage) == 0 {
 		return nil, notes.ErrNoNotesAvailable
 	}
@@ -31,7 +31,7 @@ func (im *InMemoryNotes) GetNotes() ([]notes.Note, error) {
 	return notesSlice, nil
 }
 
-func (im *InMemoryNotes) GetNoteID(noteID string) (notes.Note, error) {
+func (im *Notes) GetNoteID(noteID string) (notes.Note, error) {
 	note, ok := im.noteStorage[noteID]
 	if !ok {
 		return notes.Note{}, notes.ErrNoteNotFound
@@ -39,7 +39,7 @@ func (im *InMemoryNotes) GetNoteID(noteID string) (notes.Note, error) {
 	return note, nil
 }
 
-func (im *InMemoryNotes) DeleteNote(noteID string) error {
+func (im *Notes) DeleteNote(noteID string) error {
 	if _, ok := im.noteStorage[noteID]; !ok {
 		return notes.ErrNoteNotFound
 	}
@@ -51,7 +51,7 @@ func (im *InMemoryNotes) DeleteNote(noteID string) error {
 	return nil
 }
 
-func (im *InMemoryNotes) UpdateNote(noteID string, note notes.Note) error {
+func (im *Notes) UpdateNote(noteID string, note notes.Note) error {
 	if _, ok := im.noteStorage[noteID]; !ok {
 		return notes.ErrNoteNotFound
 	}
