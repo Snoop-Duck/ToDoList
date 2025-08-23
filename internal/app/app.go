@@ -1,5 +1,4 @@
 package app
 
-type App struct{
-	
+type App struct {
 }

@@ -11,7 +11,14 @@ func (db *DBStorage) SaveUser(user users.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := db.db.Exec(ctx, "INSERT INTO users(uid, name, email, password) VALUES ($1, $2, $3, $4)", user.UID, user.Name, user.Email, user.Password)
+	_, err := db.db.Exec(
+		ctx,
+		"INSERT INTO users(uid, name, email, password) VALUES ($1, $2, $3, $4)",
+		user.UID,
+		user.Name,
+		user.Email,
+		user.Password,
+	)
 
 	if err != nil {
 		return err
