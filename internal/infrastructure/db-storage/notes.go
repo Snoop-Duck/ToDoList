@@ -12,8 +12,17 @@ func (db *DBStorage) AddNote(notes notes.Note) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := db.db.Exec(ctx, "INSERT INTO note(nid, title, description, status, created_at, uid, deleted) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-		notes.NID, notes.Title, notes.Description, notes.Status, notes.Created_at, notes.UID, false)
+	_, err := db.db.Exec(
+		ctx,
+		"INSERT INTO note(nid, title, description, status, created_at, uid, deleted) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		notes.NID,
+		notes.Title,
+		notes.Description,
+		notes.Status,
+		notes.Created_at,
+		notes.UID,
+		false,
+	)
 	if err != nil {
 		return err
 	}
@@ -25,7 +34,10 @@ func (db *DBStorage) GetNotes() ([]notes.Note, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rows, err := db.db.Query(ctx, "SELECT nid, title, description, status, created_at, uid FROM notes WHERE deleted = false")
+	rows, err := db.db.Query(
+		ctx,
+		"SELECT nid, title, description, status, created_at, uid FROM notes WHERE deleted = false",
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get notes")
 		return nil, err
