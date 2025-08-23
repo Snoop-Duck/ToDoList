@@ -14,14 +14,14 @@ type RepositoryNote interface {
 	UpdateNote(noteID string, note notes.Note) error
 }
 
-type NoteService struct {
+type Service struct {
 	repo RepositoryNote
 }
 
-func New(repo RepositoryNote) *NoteService {
-	return &NoteService{repo: repo}
+func New(repo RepositoryNote) *Service {
+	return &Service{repo: repo}
 }
-func (ns *NoteService) CreateNote(note notes.Note) (string, error) {
+func (ns *Service) CreateNote(note notes.Note) (string, error) {
 	note.NID = uuid.New().String()
 
 	err := ns.repo.AddNote(note)
@@ -31,7 +31,7 @@ func (ns *NoteService) CreateNote(note notes.Note) (string, error) {
 	return note.NID, nil
 }
 
-func (ns *NoteService) GetNotes() ([]notes.Note, error) {
+func (ns *Service) GetNotes() ([]notes.Note, error) {
 	notes, err := ns.repo.GetNotes()
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (ns *NoteService) GetNotes() ([]notes.Note, error) {
 	return notes, nil
 }
 
-func (ns *NoteService) GetNoteID(noteID string) (notes.Note, error) {
+func (ns *Service) GetNoteID(noteID string) (notes.Note, error) {
 	note, err := ns.repo.GetNoteID(noteID)
 	if err != nil {
 		return notes.Note{}, err
@@ -47,7 +47,7 @@ func (ns *NoteService) GetNoteID(noteID string) (notes.Note, error) {
 	return note, nil
 }
 
-func (ns *NoteService) DeleteNoteID(noteID string) error {
+func (ns *Service) DeleteNoteID(noteID string) error {
 	err := ns.repo.DeleteNote(noteID)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (ns *NoteService) DeleteNoteID(noteID string) error {
 	return nil
 }
 
-func (ns *NoteService) UpdateNoteID(noteID string, note notes.Note) error {
+func (ns *Service) UpdateNoteID(noteID string, note notes.Note) error {
 	err := ns.repo.UpdateNote(noteID, note)
 	if err != nil {
 		return err

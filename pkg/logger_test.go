@@ -95,7 +95,7 @@ func TestGet_Concurrency(t *testing.T) {
 
 	results := make([]zerolog.Logger, iterations)
 
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		wg.Add(1)
 		go func(index int) {
 			defer wg.Done()

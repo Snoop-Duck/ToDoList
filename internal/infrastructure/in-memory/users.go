@@ -4,7 +4,7 @@ import (
 	"github.com/Snoop-Duck/ToDoList/internal/domain/users"
 )
 
-func (im *InMemoryUsers) SaveUser(user users.User) error {
+func (im *Users) SaveUser(user users.User) error {
 	for _, us := range im.userStorage {
 		if us.Email == user.Email {
 			return users.ErrUserAlredyExists
@@ -15,7 +15,7 @@ func (im *InMemoryUsers) SaveUser(user users.User) error {
 	return nil
 }
 
-func (im *InMemoryUsers) GetUser(login string) (users.User, error) {
+func (im *Users) GetUser(login string) (users.User, error) {
 	for _, us := range im.userStorage {
 		if us.Email == login {
 			return us, nil
@@ -24,7 +24,7 @@ func (im *InMemoryUsers) GetUser(login string) (users.User, error) {
 	return emtyUser, users.ErrUserNotFound
 }
 
-func (im *InMemoryUsers) DeleteUser(userID string) error {
+func (im *Users) DeleteUser(userID string) error {
 	if _, ok := im.userStorage[userID]; !ok {
 		return users.ErrUserNotFound
 	}
@@ -32,7 +32,7 @@ func (im *InMemoryUsers) DeleteUser(userID string) error {
 	return nil
 }
 
-func (im *InMemoryUsers) GetAllUsers() ([]users.User, error) {
+func (im *Users) GetAllUsers() ([]users.User, error) {
 	if len(im.userStorage) == 0 {
 		return nil, users.ErrNoUsersAvailable
 	}
@@ -45,7 +45,7 @@ func (im *InMemoryUsers) GetAllUsers() ([]users.User, error) {
 	return usersSlice, nil
 }
 
-func (im *InMemoryUsers) GetUserID(userID string) (users.User, error) {
+func (im *Users) GetUserID(userID string) (users.User, error) {
 	user, ok := im.userStorage[userID]
 	if !ok {
 		return users.User{}, users.ErrUserNotFound
@@ -53,7 +53,7 @@ func (im *InMemoryUsers) GetUserID(userID string) (users.User, error) {
 	return user, nil
 }
 
-func (im *InMemoryUsers) UpdateUserID(userID string, user users.User) error {
+func (im *Users) UpdateUserID(userID string, user users.User) error {
 	if _, ok := im.userStorage[userID]; !ok {
 		return users.ErrUserNotFound
 	}
@@ -61,4 +61,4 @@ func (im *InMemoryUsers) UpdateUserID(userID string, user users.User) error {
 	return nil
 }
 
-func (im *InMemoryUsers) Close() error { return nil }
+func (im *Users) Close() error { return nil }

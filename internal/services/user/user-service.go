@@ -16,15 +16,15 @@ type Repository interface {
 	Close() error
 }
 
-type UserService struct {
+type Service struct {
 	repo Repository
 }
 
-func New(repo Repository) *UserService {
-	return &UserService{repo: repo}
+func New(repo Repository) *Service {
+	return &Service{repo: repo}
 }
 
-func (us *UserService) RegisterUser(user users.User) (string, error) {
+func (us *Service) RegisterUser(user users.User) (string, error) {
 	user.UID = uuid.New().String()
 
 	err := us.repo.SaveUser(user)
@@ -34,7 +34,7 @@ func (us *UserService) RegisterUser(user users.User) (string, error) {
 	return user.UID, nil
 }
 
-func (us *UserService) LoginUser(userCreds users.UserRequest) (string, error) {
+func (us *Service) LoginUser(userCreds users.UserRequest) (string, error) {
 	dbUser, err := us.repo.GetUser(userCreds.Email)
 	if err != nil {
 		return ``, err
@@ -47,7 +47,7 @@ func (us *UserService) LoginUser(userCreds users.UserRequest) (string, error) {
 	return dbUser.UID, nil
 }
 
-func (us *UserService) DeleteUserID(userID string) error {
+func (us *Service) DeleteUserID(userID string) error {
 	err := us.repo.DeleteUser(userID)
 	if err != nil {
 		return err
@@ -55,11 +55,11 @@ func (us *UserService) DeleteUserID(userID string) error {
 	return nil
 }
 
-func (us *UserService) GetUsers() ([]users.User, error) {
+func (us *Service) GetUsers() ([]users.User, error) {
 	return us.repo.GetAllUsers()
 }
 
-func (us *UserService) GetUser(userID string) (users.User, error) {
+func (us *Service) GetUser(userID string) (users.User, error) {
 	user, err := us.repo.GetUserID(userID)
 	if err != nil {
 		return users.User{}, err
@@ -67,7 +67,7 @@ func (us *UserService) GetUser(userID string) (users.User, error) {
 	return user, nil
 }
 
-func (us *UserService) UpdateUser(userID string, user users.User) error {
+func (us *Service) UpdateUser(userID string, user users.User) error {
 	err := us.repo.UpdateUserID(userID, user)
 	if err != nil {
 		return err
