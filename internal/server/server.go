@@ -19,8 +19,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/Snoop-Duck/ToDoList/docs"
-    swaggerFiles "github.com/swaggo/files"
-    ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (

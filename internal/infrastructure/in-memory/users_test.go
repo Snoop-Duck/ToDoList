@@ -9,7 +9,7 @@ import (
 )
 
 func TestInMemoryUsers(t *testing.T) {
-	im := NewUsers()
+	im := NewUsers(false)
 
 	user1 := users.User{
 		UID:   "11111111-1111-1111-1111-111111111111",
