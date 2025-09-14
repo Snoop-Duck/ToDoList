@@ -24,6 +24,10 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gorm.io/driver/postgres"
+
+	_ "github.com/Snoop-Duck/ToDoList/docs"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -44,28 +48,40 @@ func gracefulShutdown(cancel context.CancelFunc) {
 	cancel()
 }
 
-func setupDatabase(log logger.Logger, dns string) (server.Repository, *gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
-	if err != nil {
-		log.Error().Err(err).Msg("failed to connect to database")
-		return nil, nil, err
-	}
+func setupDatabase(log logger.Logger, dns string, debug bool) (server.Repository, server.RepositoryNote, *gorm.DB, error) {
+	ctx := context.Background()
 
-	repoUser, err := dbstorage.New(context.Background(), dns)
+	// 1. Пытаемся подключиться к БД через pgxpool
+	dbPool, err := pgxpool.New(ctx, dns)
 	if err != nil {
-		log.Warn().Err(err).Msg("failed to connect to db. Use in memory storage")
-		return inmemory.NewUsers(), db, nil
+		log.Warn().Err(err).Msg("failed to connect to database. Using in-memory storage")
+		return inmemory.NewUsers(debug), inmemory.NewNotes(debug, "storage/notes.json"), nil, nil
 	}
+	defer dbPool.Close()
 
+	// 2. Пытаемся применить миграции
 	if err = dbstorage.ApplyMigrations(dns); err != nil {
-		log.Warn().Err(err).Msg("failed to apply migrations. Use in memory storage")
-		if rErr := repoUser.Close(); rErr != nil {
-			log.Error().Err(rErr).Msg("failed to close repository")
-		}
-		return inmemory.NewUsers(), db, nil
+		log.Warn().Err(err).Msg("failed to apply migrations. Using in-memory storage")
+		return inmemory.NewUsers(debug), inmemory.NewNotes(debug, "storage/notes.json"), nil, nil
 	}
 
-	return repoUser, db, nil
+	// 3. Создаем DBStorage который будет работать с БД
+	dbStorage, err := dbstorage.New(ctx, dns)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to create DB storage. Using in-memory storage")
+		return inmemory.NewUsers(debug), inmemory.NewNotes(debug, "storage/notes.json"), nil, nil
+	}
+
+	// 4. Также создаем gorm connection для sync service
+	gormDB, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to create gorm connection, sync service will not work")
+		// Но продолжаем работу с БД репозиториями
+		return dbStorage, dbStorage, nil, nil
+	}
+
+	// 5. Возвращаем ОБА репозитория из DBStorage
+	return dbStorage, dbStorage, gormDB, nil
 }
 
 func startSyncService(ctx context.Context, db *gorm.DB, log logger.Logger) {
@@ -136,6 +152,25 @@ func runServer(
 	return group.Wait()
 }
 
+// @title ToDoList API
+// @version 1.0
+// @description API для управления задачами и заметками
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.email support@todolist.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description JWT token for authentication. Format: "Bearer {token}"
 func main() {
 	cfg, err := internal.ReadConfig()
 	if err != nil {
@@ -153,17 +188,17 @@ func main() {
 
 	dns := os.Getenv("DB_CONNECTION_STRING")
 	if dns == "" {
-		dns = "postgres://user:password@db:5432/notes?sslmode=disable"
+		dns = "postgres://user:password@localhost:5432/notes?sslmode=disable"
 	}
 
-	repoUser, db, setupErr := setupDatabase(log, dns)
+	// Получаем оба репозитория и gorm соединение
+	repoUser, repoNote, db, setupErr := setupDatabase(log, dns, cfg.Debug)
 	if setupErr != nil {
 		log.Error().Err(setupErr).Msg("failed to setup database")
 		return
 	}
 
-	repoNote := inmemory.NewNotes(cfg.Debug, "storage/notes.json")
-
+	// Запускаем sync service только если есть gorm соединение
 	if db != nil {
 		startSyncService(ctx, db, log)
 	}

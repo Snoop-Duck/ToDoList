@@ -37,10 +37,10 @@ func NewNotes(debug bool, filePath string) *Notes {
 	return storage
 }
 
-func NewUsers() *Users {
+func NewUsers(debug bool) *Users {
 	return &Users{
 		userStorage: make(map[string]users.User),
-		log:         logger.Get(),
+		log:         logger.Get(debug),
 	}
 }
 

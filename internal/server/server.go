@@ -17,6 +17,10 @@ import (
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+
+	_ "github.com/Snoop-Duck/ToDoList/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -89,6 +93,8 @@ func (nApi *NotesAPI) Stop(ctx context.Context) error {
 func (nApi *NotesAPI) configRoutes() {
 	nApi.log.Debug().Msg("configure routes")
 	router := gin.Default()
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Use(gzip.Gzip(
 		gzip.BestSpeed,
